@@ -8,7 +8,7 @@ import { addLog } from "../../store/slices/loggerSlice";
 import { v4 } from "uuid";
 import { deleteList, setModalActive } from "../../store/slices/boardsSlice";
 import { setModalData } from "../../store/slices/modalSlice";
-
+ 
 type TListProps = {
   list: IList;
   boardId: string;
