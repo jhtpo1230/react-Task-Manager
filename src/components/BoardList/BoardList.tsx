@@ -1,8 +1,14 @@
 import React, { FC, useState } from "react";
 import { useTypedDispatch, useTypedSelector } from "../../hooks/redux";
 import SideForm from "./SideForm/SideForm";
-import { FiPlusCircle } from "react-icons/fi";
+import { FiLogIn, FiPlusCircle } from "react-icons/fi";
+import {addButton, addSection, boardItem, boardItemActive, container, title} from "./BoardList.css";
+import { removeUser, setUser } from "../../store/slices/userSlice";
 import clsx from "clsx";
+import { GoogleAuthProvider, getAuth, signInWithPopup, signOut } from "firebase/auth";
+import { GoSignOut } from "react-icons/go";
+import { useAuth } from "../../hooks/useAuth";
+import { app } from "../../firebase";
 
 type TBoardListProps = {
   activeBoardId : string;
@@ -17,20 +23,47 @@ const BoardList : FC<TBoardListProps> = ({
 
   const {boardArray} = useTypedSelector(state => state.boards);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+  const dispatch = useTypedDispatch();
+  const { isAuth } = useAuth();
 
   const handleClick = () => {
     setIsFormOpen(!isFormOpen)
-    setTimeout(() => inputRef.current?.focus(), 0);
+  };
+
+  const handleLogin = () => {
+    signInWithPopup(auth, provider)
+      .then((userCredential) => {
+        console.log(userCredential);
+        dispatch(
+          setUser({
+            email: userCredential.user.email!,
+            id: userCredential.user.uid,
+          })
+        );
+        return;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  const handleLogout = () => {
+    signOut(auth)
+      .then(() => {
+        dispatch(removeUser());
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (
-    <div>
-      <div>
-        게시판 : 
-      </div>
-      {boardArray.map((board, index) => (
-        <div key={board.boardId}>
+    <div className={container}>
+      <div className={title}>게시판:</div>
+      {boardArray.map((board, idx) => (
+        <div
+          key={board.boardId}
           onClick={() => setActiveBoardId(boardArray[idx].boardId)}
           className={clsx(
             {
@@ -47,17 +80,20 @@ const BoardList : FC<TBoardListProps> = ({
           <div>{board.boardName}</div>
         </div>
       ))}
-      <div>
-        {
-          isFormOpen ?
-          (<SideForm inputRef={inputRef}setIsFormOpen = {setIsFormOpen}/>)
-          :
-          (<FiPlusCircle className={addButton} onClick={handleClick} />)
-        }
+      <div className={addSection}>
+        {isFormOpen ? (
+          <SideForm setIsFormOpen={setIsFormOpen} />
+        ) : (
+          <FiPlusCircle className={addButton} onClick={handleClick} />
+        )}
+        {isAuth ? (
+          <GoSignOut className={addButton} onClick={handleLogout} />
+        ) : (
+          <FiLogIn className={addButton} onClick={handleLogin} />
+        )}
       </div>
-      
     </div>
-  )
-}
+  );
+};
 
-export default BoardList
+export default BoardList;

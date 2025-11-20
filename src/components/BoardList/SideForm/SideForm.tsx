@@ -12,12 +12,10 @@ type TSideFormProps = {
 };
 
 const SideForm: FC<TSideFormProps> = ({ 
-  setIsFormOpen,
-  inputRef 
+  setIsFormOpen
 }) => {
   const [inputText, setInputText] = useState("");
   const dispatch = useTypedDispatch();
-  const ref = useRef(null);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setInputText(e.target.value);

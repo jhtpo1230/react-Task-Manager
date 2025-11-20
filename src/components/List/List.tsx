@@ -8,6 +8,7 @@ import { addLog } from "../../store/slices/loggerSlice";
 import { v4 } from "uuid";
 import { deleteList, setModalActive } from "../../store/slices/boardsSlice";
 import { setModalData } from "../../store/slices/modalSlice";
+import { Draggable, Droppable } from "react-beautiful-dnd";
  
 type TListProps = {
   list: IList;
@@ -40,10 +41,17 @@ const List: FC<TListProps> = ({ list, boardId }) => {
   };
 
   return (
-        <div>
-          <div>
-            <div>{list.listName}</div>
+    <Droppable droppableId={list.listId}>
+      {(provided) => (
+        <div
+          className={listWrapper}
+          ref={provided.innerRef}
+          {...provided.droppableProps}
+        >
+          <div className={header}>
+            <div className={name}>{list.listName}</div>
             <GrSubtract
+              className={deleteButton}
               onClick={() => handleListDelete(list.listId)}
             />
           </div>
@@ -63,9 +71,12 @@ const List: FC<TListProps> = ({ list, boardId }) => {
               />
             </div>
           ))}
+          {provided.placeholder}
           <ActionButton boardId={boardId} listId={list.listId} />
         </div>
-      )
-}
+      )}
+    </Droppable>
+  );
+};
 
 export default List;
